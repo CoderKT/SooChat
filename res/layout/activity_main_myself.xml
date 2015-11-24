@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="#C0C0C0">
+
+    <RelativeLayout 
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="#FFFFFF"
+        android:layout_marginTop="10dip"
+        android:onClick="openMyselfSettings">
+        
+        <ImageView
+            android:id="@+id/ivFavicon"
+            android:layout_width="50dip"
+            android:layout_height="50dip"
+            android:src="@drawable/favicon" />
+        
+        <TextView 
+            android:id="@+id/tvMyName"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_toRightOf="@id/ivFavicon"
+            android:layout_marginTop="5dip"
+            android:layout_marginLeft="10dip"
+            android:text="我的名字"/>
+        
+        <TextView 
+            android:id="@+id/tvNumber"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_toRightOf="@id/ivFavicon"
+            android:layout_below="@id/tvMyName"
+            android:layout_marginTop="5dip"
+            android:layout_marginLeft="10dip"
+            android:text="我的工号"/>
+        
+    </RelativeLayout>
+
+    <ListView
+        android:id="@+id/lvMyInfo"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="#FFFFFF"
+        android:layout_marginTop="10dip">
+    </ListView>
+        
+    <Button 
+        android:id="@+id/btnQuit"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/quit"        
+        android:onClick="quit"
+        android:layout_marginTop="20dip"
+        android:layout_marginLeft="10dip"
+        android:layout_marginRight="10dip"
+        android:background="#6699FF"/>
+    
+</LinearLayout>

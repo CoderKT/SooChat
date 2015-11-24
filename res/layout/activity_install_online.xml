@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical" >
+
+    <TextView 
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="10dip"
+        android:text="@string/update_path"/>
+    
+    <EditText 
+        android:id="@+id/etPath"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="@string/update_path"
+        android:text="http://192.168.9.106:8080/KfAppService/release/KfApp.apk"/>
+    
+	<TextView 
+        android:id="@+id/tvUpdateMessage"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="10dip"
+        android:text=""/>
+    
+    <Button 
+        android:id="@+id/btnUpdate"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/online_update">
+        
+    </Button>"
+
+</LinearLayout>

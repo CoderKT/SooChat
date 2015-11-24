@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <ImageView
+        android:id="@+id/ivChatItemIcon"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentLeft="true"
+        android:layout_marginLeft="10dp"
+        android:layout_marginTop="10dip"
+        android:src="@drawable/chat_item_icon_0"/>
+    
+    <TextView 
+        android:id="@+id/tvChatItemTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_toRightOf="@id/ivChatItemIcon"
+        android:layout_alignTop="@id/ivChatItemIcon"
+        android:layout_marginLeft="10dp"
+        android:textSize="14sp"
+        android:text="这是标题"/>
+    
+    <TextView 
+        android:id="@+id/tvChatItemDesc"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_toRightOf="@id/ivChatItemIcon"
+        android:layout_below="@id/tvChatItemTitle"
+        android:layout_alignLeft="@id/tvChatItemTitle"
+        android:textSize="12sp"
+        android:textColor="#C0C0C0"
+        android:text="这是一条会话的描述......"/>
+    
+    <TextView 
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentRight="true"
+        android:layout_marginRight="10dp"
+        android:textSize="12sp"
+        android:textColor="#C0C0C0"
+        android:layout_alignBaseline="@id/tvChatItemTitle"
+        android:text="10:00"/>
+
+</RelativeLayout>
