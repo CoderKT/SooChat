@@ -14,33 +14,28 @@ import com.kekexun.soochat.pojo.ChatItem;
 
 public class ChatAdapter extends BaseAdapter {
 	
-	private List<ChatItem> items = new ArrayList<ChatItem>();
+	private List<ChatItem> chatItems = new ArrayList<ChatItem>();
 	private LayoutInflater layoutInflater;
 	
 
-	public ChatAdapter(List<ChatItem> items, LayoutInflater layoutInflater) {
-		this.items = items;
+	public ChatAdapter(List<ChatItem> chatItems, LayoutInflater layoutInflater) {
+		this.chatItems = chatItems;
 		this.layoutInflater = layoutInflater;
 	}
 	
 	@Override
-	public int getCount() {
-		return items.size();
+	public long getItemId(int position) {
+		return 0;
 	}
 
 	@Override
 	public Object getItem(int position) {
-		return items.get(position);
-	}
-
-	@Override
-	public long getItemId(int position) {
-		return ((ChatItem) getItem(position)).getId();
+		return chatItems.get(position);
 	}
 
 	@Override
 	public View getView(int position, View convertView, ViewGroup parent) {
-		ChatItem chatItem = items.get(position);
+		ChatItem chatItem = chatItems.get(position);
 		
 		View itemView = layoutInflater.inflate(R.layout.activity_main_chat_item, null);
 
@@ -52,6 +47,11 @@ public class ChatAdapter extends BaseAdapter {
 		tvDesc.setText(chatItem.getDesc());
 		
 		return itemView;
+	}
+
+	@Override
+	public int getCount() {
+		return chatItems.size();
 	}
 
 }

@@ -1,8 +1,12 @@
 package com.kekexun.soochat.pojo;
 
-public class ChatItem extends BasePojo {
+import java.io.Serializable;
 
-	private long id;
+public class ChatItem extends BasePojo implements Serializable {
+
+	private static final long serialVersionUID = -441994848867283491L;
+	
+	private String id;
 	private String icon;
 	private String title;
 	private String desc;
@@ -11,20 +15,20 @@ public class ChatItem extends BasePojo {
 	public ChatItem() {
 	}
 	
-	public ChatItem(int id, String icon, String title) {
+	public ChatItem(String id, String icon, String title) {
 		this.id = id;
 		this.icon = icon;
 		this.title = title;
 	}
 	
-	public ChatItem(int id, String icon, String title, String desc) {
+	public ChatItem(String id, String icon, String title, String desc) {
 		this.id = id;
 		this.icon = icon;
 		this.title = title;
 		this.desc = desc;
 	}
 	
-	public ChatItem(int id, String icon, String title, String desc, String time) {
+	public ChatItem(String id, String icon, String title, String desc, String time) {
 		this.id = id;
 		this.icon = icon;
 		this.title = title;
@@ -32,10 +36,10 @@ public class ChatItem extends BasePojo {
 		this.time = time;
 	}
 	
-	public long getId() {
+	public String getId() {
 		return id;
 	}
-	public void setId(long id) {
+	public void setId(String id) {
 		this.id = id;
 	}
 	public String getIcon() {

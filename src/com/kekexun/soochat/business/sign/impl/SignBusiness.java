@@ -1,8 +1,7 @@
 package com.kekexun.soochat.business.sign.impl;
 
-import java.io.UnsupportedEncodingException;
-
-import org.apache.http.Header;
+import java.util.ArrayList;
+import java.util.List;
 
 import android.content.Context;
 import android.content.Intent;
@@ -16,14 +15,15 @@ import com.kekexun.soochat.activity.sign.SignActivity;
 import com.kekexun.soochat.business.impl.BaseBusiness;
 import com.kekexun.soochat.common.BusinessNameEnum;
 import com.kekexun.soochat.common.K;
-import com.kekexun.soochat.smack.IMServer;
-import com.loopj.android.http.AsyncHttpClient;
-import com.loopj.android.http.AsyncHttpResponseHandler;
+import com.kekexun.soochat.pojo.ChatItem;
+import com.kekexun.soochat.smack.BaseIMServer;
+import com.kekexun.soochat.smack.ConnectionListener;
+import com.kekexun.soochat.smack.IIMServer;
 
 /**
  * 
  * @author Ke.Wang
- *
+ * @date 2015.11.25
  */
 public class SignBusiness extends BaseBusiness {
 	
@@ -51,23 +51,6 @@ public class SignBusiness extends BaseBusiness {
 		return sharedPreferences.getBoolean(K.Login.IS_LOGIN, false);
 	}
 	
-	public void loginOpenfire(final String username, final String password) {
-		new Thread() {
-
-			@Override
-			public void run() {
-				IMServer imServer = new IMServer();
-				try {
-					imServer.login(username, password);
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-				System.out.println("aaaa");
-			}
-			
-		}.start();
-	}
-	
 	/**
 	 * Ö´ÐÐµÇÂ¼
 	 * @param username
@@ -76,46 +59,52 @@ public class SignBusiness extends BaseBusiness {
 	 * @throws Exception
 	 */
 	public void doLogin(final String username, final String password) throws Exception {
-		AsyncHttpClient asyncHttpClient = new AsyncHttpClient();
-		String hostAddress = sharedPreferences.getString(K.PreferenceKey.KEY_HOST_URL, "http://192.168.9.106:8080/KfAppService"); // TODO
-		String url = hostAddress + "/" + BusinessNameEnum.LOGIN_BUSINESS.getName();
+		final IIMServer imServer = new BaseIMServer(sharedPreferences);
 		
-		asyncHttpClient.post(url, new AsyncHttpResponseHandler() {
+		Log.d(tag, "------ 0 SignBusiness.doLogin()");
+		
+		if (((BaseIMServer) imServer).getConn() != null) {
+			Log.d(tag, "------ 0 SignBusiness.doLogin() conn is exists. conn=" + ((BaseIMServer) imServer).getConn());
+			
+			saveLoginInfo(username, password, true);
+			
+			Intent intent = new Intent(context, MainActivity.class);
+			//intent.putExtra("chatItems", (ArrayList<ChatItem>) chatItems);
+			
+			context.startActivity(intent);
+			
+			((SignActivity) context).finish();
+			
+			return;
+		}
+		
+		// µÇÂ¼
+		imServer.connect(username, password, new ConnectionListener() {
 			
 			@Override
-			public void onSuccess(int responseCode, Header[] headers, byte[] responseContent) {
-				String content = "";
-				try {
-					content = new String(responseContent, "utf-8");
-				} catch (UnsupportedEncodingException e) {
-					Log.e(tag, "·µ»ØÄÚÈÝ×ª»»³É×Ö·û´®±¨´í£¬Ô­Òò£º" + e.getMessage());
-				}
-				
-				Log.d(tag, "µÇÂ¼³É¹¦¡£content=" + content);
-				
+			public void onSuccess() {
+				Log.d(tag, "------ 3 ConnectionListener.onSuccess()");
+				// 
 				saveLoginInfo(username, password, true);
 				
-				Intent intent = new Intent();
-				intent.setClass(context, MainActivity.class);
+				//List<ChatItem> chatItems = imServer.queryRoster();
+				//Log.d(tag, "------ 3.1 ConnectionListener.onSuccess() chatItems=" + chatItems);
+				
+				Intent intent = new Intent(context, MainActivity.class);
+				//intent.putExtra("chatItems", (ArrayList<ChatItem>) chatItems);
+				
 				context.startActivity(intent);
 				
 				((SignActivity) context).finish();
 			}
 			
 			@Override
-			public void onFailure(int responseCode, Header[] headers, byte[] responseContent, Throwable t) {
-				Toast.makeText(context, "µÇÂ¼Ê§°Ü£¡", Toast.LENGTH_SHORT).show();
-				
-				String content = "";
-				try {
-					content = new String(responseContent, "utf-8");
-				} catch (Exception e) {
-					content += " µÇÂ¼Ê§°Ü£¬·µ»ØÐÅÏ¢±àÂë×ª»»Òì³££¡ÏêÏ¸Ô­Òò: " + e.getMessage();
-					Log.e(tag, content);
-				}
-				
-				Log.d(tag, "µÇÂ¼Ê§°Ü¡£content=" + content);
+			public void onFailure(String errorMessage) {
+				Log.d(tag, "------ 3 IMServer connect()@ConnectionListener@onFailure()");
+				Toast.makeText(context, "µÇÂ¼Ê§°Ü¡£ÏêÏ¸Ô­Òò£º" + errorMessage, Toast.LENGTH_SHORT).show();
+				Log.e(tag, "µÇÂ¼Ê§°Ü¡£ÏêÏ¸Ô­Òò£º" + errorMessage);
 			}
+			
 		});
 		
 	}

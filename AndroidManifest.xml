@@ -33,6 +33,7 @@
         <activity android:name="com.kekexun.soochat.activity.sign.SignActivity"/>
         
         <activity
+            android:launchMode="singleTop"
             android:name="com.kekexun.soochat.activity.main.MainActivity"
             android:screenOrientation="portrait"/>
         

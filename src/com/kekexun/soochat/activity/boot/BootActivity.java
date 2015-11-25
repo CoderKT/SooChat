@@ -20,10 +20,10 @@ public class BootActivity extends Activity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		
-		SignBusiness loginBusiness = new SignBusiness(BootActivity.this);
+		SignBusiness signBusiness = new SignBusiness(BootActivity.this);
 		
 		// ÅÐ¶ÏÊÇ·ñÒÑ¾­µÇÂ¼
-		isLogin = loginBusiness.isLogin();
+		isLogin = signBusiness.isLogin();
 		
 		Intent intent = new Intent();
 		if (!isLogin) {

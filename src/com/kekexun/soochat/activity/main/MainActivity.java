@@ -4,8 +4,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 import android.app.AlertDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
@@ -33,11 +35,15 @@ import com.kekexun.soochat.activity.main.discover.DiscoveryFragment;
 import com.kekexun.soochat.activity.main.myself.MySelfFragment;
 import com.kekexun.soochat.activity.main.myself.MyselfSettingActivity;
 import com.kekexun.soochat.business.sign.impl.SignBusiness;
+import com.kekexun.soochat.pojo.ChatItem;
 import com.kekexun.soochat.pojo.MyInfoItem;
+import com.kekexun.soochat.smack.BaseIMServer;
+import com.kekexun.soochat.smack.IIMServer;
 
 /**
  * 
  * @author Ke.Wang
+ * @date 2015.11.25
  *
  */
 public class MainActivity extends FragmentActivity {
@@ -62,7 +68,7 @@ public class MainActivity extends FragmentActivity {
 	private MySelfFragment myselfFragment;
 	
 	private FragmentManager fragmentManager;
-
+	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -113,8 +119,10 @@ public class MainActivity extends FragmentActivity {
 		btnDiscovery = (Button) this.findViewById(R.id.btnDiscovery);
 		btnMyself = (Button) this.findViewById(R.id.btnMyself);
 		
-		chatFragment = new ChatFragment();
-		addrBookFragment = new AddrBookFragment();
+		// Init chat panel
+		chatFragment = initChatPanel();
+		// Init addrBook panel
+		addrBookFragment = initAddrBookPanel();
 		discoveryFragment = new DiscoveryFragment();
 		myselfFragment = new MySelfFragment();
 		
@@ -140,6 +148,11 @@ public class MainActivity extends FragmentActivity {
 
 			@Override
 			public void onPageSelected(int item) {
+				btnChat.setTextColor(Color.parseColor("#CCCCCC"));
+				btnAddrBook.setTextColor(Color.parseColor("#CCCCCC"));
+				btnDiscovery.setTextColor(Color.parseColor("#CCCCCC"));
+				btnMyself.setTextColor(Color.parseColor("#CCCCCC"));
+				
 				switch(item) {
 					case 0:
 						btnChat.setTextColor(Color.BLUE);
@@ -148,15 +161,40 @@ public class MainActivity extends FragmentActivity {
 						btnAddrBook.setTextColor(Color.BLUE);
 					break;
 					case 2:
-						btnDiscovery.setTextColor(Color.RED);
+						btnDiscovery.setTextColor(Color.BLUE);
 					break;
 					case 3:
-						btnMyself.setTextColor(Color.RED);
+						btnMyself.setTextColor(Color.BLUE);
 					break;
 				}
 			}
 			
 		});
+	}
+	
+	/**
+	 * Initialization chat panel
+	 */
+	private ChatFragment initChatPanel() {
+		SharedPreferences sharedPreferences = this.getSharedPreferences("prefenrences", Context.MODE_PRIVATE);
+		//List<ChatItem> chatItems = (ArrayList<ChatItem>) getIntent().getSerializableExtra("chatItems");
+		final IIMServer imServer = new BaseIMServer(sharedPreferences);
+		List<ChatItem> chatItems = imServer.queryRoster();
+		chatItems = chatItems != null ? chatItems : new ArrayList<ChatItem>();
+		Log.d(tag, "------ MainActivity.initChatPanel() chatItems=" + chatItems);
+		chatFragment = new ChatFragment(chatItems);
+		return chatFragment;
+	}
+	
+	/**
+	 * Initialization chat panel
+	 */
+	@SuppressWarnings("unchecked")
+	private AddrBookFragment initAddrBookPanel() {
+		List groupItems = (ArrayList<ChatItem>) getIntent().getSerializableExtra("groupItems");
+		groupItems = groupItems != null ? groupItems : new ArrayList();
+		addrBookFragment = new AddrBookFragment(groupItems);
+		return addrBookFragment;
 	}
 	
 	public void setPage(View v) {
@@ -249,6 +287,10 @@ public class MainActivity extends FragmentActivity {
 		return myInfos;
 	}
 	
+	/**
+	 * Quit
+	 * @param view
+	 */
 	public void quit(View view) {
 		AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
 		builder.setTitle("ÌבÊ¾");

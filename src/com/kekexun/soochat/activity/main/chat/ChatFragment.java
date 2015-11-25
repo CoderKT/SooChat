@@ -14,10 +14,24 @@ import com.kekexun.soochat.activity.R;
 import com.kekexun.soochat.adapter.main.chat.ChatAdapter;
 import com.kekexun.soochat.pojo.ChatItem;
 
+/**
+ * 
+ * @author Ke.Wang
+ * @date 2015.11.25
+ *
+ */
 public class ChatFragment extends BaseFragment {
 	
 	private View vPanel;
 	private ListView lvChatList;
+	private List<ChatItem> chatItems = new ArrayList<ChatItem>();
+	
+	public ChatFragment() {
+	}
+	
+	public ChatFragment(List<ChatItem> chatItems) {
+		this.chatItems = chatItems;
+	}
 	
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -34,15 +48,9 @@ public class ChatFragment extends BaseFragment {
 	 */
 	private void initViews(LayoutInflater layoutInflater) {
 		lvChatList = (ListView) vPanel.findViewById(R.id.lvChatList);
-		
-		List<ChatItem> items = new ArrayList<ChatItem>();
-		for (int i = 0; i < 5; i++) {
-			ChatItem item = new ChatItem(i, "icon_" + i, "title_" + i, "ÕâÊÇÄÚÈÝÃèÊö_" + i);
-			items.add(item);
-		}
-		
-		ChatAdapter chatAdapter = new ChatAdapter(items, layoutInflater);
+		ChatAdapter chatAdapter = new ChatAdapter(chatItems, layoutInflater);
 		lvChatList.setAdapter(chatAdapter);
+		
 	}
 
 }

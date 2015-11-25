@@ -10,6 +10,8 @@ public final class K {
 	
 	public static final class PreferenceKey {
 		public static final String KEY_HOST_URL = "KEY_HOST_URL";
+		public static final String KEY_XMPP_RESOURCE = "resource";
+		public static final String KEY_XMPP_SERVER_PORT = "port";
 	}
 	
 }

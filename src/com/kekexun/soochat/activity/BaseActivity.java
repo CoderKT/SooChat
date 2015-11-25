@@ -5,6 +5,12 @@ import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 
+/**
+ * 
+ * @author Ke.Wang
+ * @date 2015.11.25
+ *
+ */
 public class BaseActivity extends Activity {
 
 	protected static final int LIFTCYCLE_CREATE = 0;

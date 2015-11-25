@@ -1,6 +1,5 @@
 package com.kekexun.soochat.activity.sign;
 
-import android.content.Intent;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
@@ -10,16 +9,21 @@ import android.widget.Toast;
 
 import com.kekexun.soochat.activity.BaseActivity;
 import com.kekexun.soochat.activity.R;
-import com.kekexun.soochat.activity.main.MainActivity;
 import com.kekexun.soochat.business.sign.impl.SignBusiness;
 
+/**
+ * 
+ * @author Ke.Wang
+ * @date 2015.11.25
+ *
+ */
 public class SignActivity extends BaseActivity {
 	
 	private static final String tag = "LoginActivity";
 	
 	private EditText etLoginName;
 	private EditText etLoginPassword;
-	private SignBusiness loginBusiness;
+	private SignBusiness signBusiness;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -29,7 +33,7 @@ public class SignActivity extends BaseActivity {
 		// 检查网络状态
 		//checkNetState(LIFTCYCLE_CREATE);
 		
-		loginBusiness = new SignBusiness(this);
+		signBusiness = new SignBusiness(this);
 		
 		initViews();
 	}
@@ -68,16 +72,7 @@ public class SignActivity extends BaseActivity {
 		}
 		
 		try {
-			loginBusiness.loginOpenfire(loginName, loginPassword);
-			//loginBusiness.doLogin(loginName, loginPassword);
-			
-			//TOD 以下内容为模拟登录 begin
-			loginBusiness.saveLoginInfo(loginName, loginPassword, true);
-			Intent intent = new Intent();
-			intent.setClass(this, MainActivity.class);
-			this.startActivity(intent);
-			this.finish();
-			//TOD 以下内容为模拟登录 end
+			signBusiness.doLogin(loginName, loginPassword);
 		} catch (Exception e) {
 			Log.e(tag, "登录发生异常！" + e.getMessage());
 			Toast.makeText(this, "登录异常！原因：", Toast.LENGTH_SHORT).show();
