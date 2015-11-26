@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">搜聊</string>
+   	<string name="blank_description"></string>
     <string name="login_header_image">登录头像</string>
     <string name="login">登录</string>
     <string name="username_phone_email">用户名/手机号码/邮箱</string>
@@ -13,4 +14,5 @@
     <string name="address_book">通信录</string>
     <string name="discovery">发现</string>
     <string name="myself">我的</string>
+    <string name="please_input">请输入...</string>
 </resources>

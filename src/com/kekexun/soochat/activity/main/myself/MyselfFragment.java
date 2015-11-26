@@ -8,7 +8,7 @@ import android.view.ViewGroup;
 import com.kekexun.soochat.activity.BaseFragment;
 import com.kekexun.soochat.activity.R;
 
-public class MySelfFragment extends BaseFragment {
+public class MyselfFragment extends BaseFragment {
 	
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,

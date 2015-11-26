@@ -29,15 +29,49 @@ import com.kekexun.soochat.pojo.ChatItem;
  * @date 2015.11.25
  *
  */
-public class BaseIMServer implements IIMServer {
+public class BaseIMServer implements IMServer {
 	
 	private static final String tag = "BaseIMServer";
 	
-	private static AbstractXMPPConnection conn;
+	/**
+	 * 唯一实例
+	 */
+	private static BaseIMServer instance;
+	
+	/**
+	 * 链接
+	 */
+	private AbstractXMPPConnection conn;
+	
+	/**
+	 * 
+	 */
 	private SharedPreferences sharedPreferences;
 	
-	public BaseIMServer(SharedPreferences sharedPreferences) {
-		this.sharedPreferences = sharedPreferences;
+	/**
+	 * 是否连接到IMServer
+	 */
+	private boolean isConnected = false;
+
+	/**
+	 * Construct
+	 * @param sharedPreferences
+	 */
+	private BaseIMServer() {
+	}
+	
+	/**
+	 * 获取实例
+	 * @return
+	 */
+	public static BaseIMServer getInstance() {
+		if (instance == null) {
+			Log.d(tag, "------ 新创建 BaseIMServer 实例");
+			instance = new BaseIMServer();
+			return instance;
+		}
+		Log.d(tag, "------ 返回已经存在的 BaseIMServer 实例");
+		return instance;
 	}
 	
 	/**
@@ -58,7 +92,9 @@ public class BaseIMServer implements IIMServer {
 		return null;
 	}
 
-
+	/**
+	 * 连接的 IMServer 服务器
+	 */
 	@Override
 	public void connect(final String username, final String password, final ConnectionListener connListener) throws Exception {
 		Log.d(tag, "------ 1 BaseIMServer.connect()");
@@ -71,17 +107,18 @@ public class BaseIMServer implements IIMServer {
 
 			@Override
 			public void run() {
-				Log.d(tag, "------ 2 BaseIMServer@new Thread().run() begin");
+				Log.d(tag, "------ 2 BaseIMServer#new Thread().run() begin");
+				
 				// XMPP service (i.e., the XMPP domain)
-				String serviceName = sharedPreferences.getString(K.PreferenceKey.KEY_XMPP_RESOURCE, "192.168.9.107");
+				String serviceName = sharedPreferences.getString(K.PreferenceKey.KEY_XMPP_RESOURCE, "192.168.9.120");
 				// 资源
 				String resource = sharedPreferences.getString(K.PreferenceKey.KEY_XMPP_RESOURCE, "SooChat");
+				// 端口
 				int port = sharedPreferences.getInt(K.PreferenceKey.KEY_XMPP_SERVER_PORT, 5222);
 				
 				XMPPTCPConnectionConfiguration.Builder configBuilder = XMPPTCPConnectionConfiguration.builder();
 				configBuilder.setUsernameAndPassword(username, password)
 							 .setServiceName(serviceName)
-							 .setHost(serviceName)
 							 .setPort(port)
 							 .setResource(resource)
 							 .setSecurityMode(SecurityMode.disabled);
@@ -119,19 +156,20 @@ public class BaseIMServer implements IIMServer {
 					}
 				});
 				
-				conn = new XMPPTCPConnection(configBuilder.build());
-				
 				try {
+					conn = new XMPPTCPConnection(configBuilder.build());
+					setConnected(true);
 					conn.connect();
 					conn.login();
-					Log.d(tag, "------ 2.1 BaseIMServer@new Thread().run() conn=" + conn);
+					Log.d(tag, "------ 2.1 BaseIMServer#new Thread().run() conn=" + conn);
 					connListener.onSuccess();
 				} catch (Exception e) {
-					Log.e(tag, "@@@@@@" + e.getMessage());
-					connListener.onFailure("@@@@@@" + e.getMessage());
+					setConnected(false);
+					Log.e(tag, "@@@@@@ BaseIMServer#new Thread().run() " + e.getMessage());
+					connListener.onFailure(e.getMessage());
 				}
 				
-				Log.d(tag, "------ 2.2 BaseIMServer new Thread().run() end");
+				Log.d(tag, "------ 2.2 BaseIMServer#new Thread().run() end");
 			}
 			
 		}.start();
@@ -144,17 +182,21 @@ public class BaseIMServer implements IIMServer {
 	 */
 	@Override
 	public List<ChatItem> queryRoster() {
-		Log.d(tag, "------ 4 BaseIMServer queryMyRoster()");
+		Log.d(tag, "------ 4 BaseIMServer.queryMyRoster()");
 		List<ChatItem> chatItems = new ArrayList<ChatItem>();
-		if (getConn() == null) {
-			Log.d(tag, "------ 4.1 BaseIMServer conn is " + getConn());
+		if (getConn() == null || !getConn().isConnected()) { // TODO conn is null or not connected need to handle.
+			Log.d(tag, "------ 4.1 BaseIMServer.queryRoster() conn=" + getConn());
+			if (getConn() != null) {
+				Log.d(tag, "------ 4.2 BaseIMServer.queryRoster() isConnected=" + getConn().isConnected());	
+			}
+			Log.d(tag, "------ 4.3 BaseIMServer.queryRoster() return");
 			return chatItems;
 		}
-		Log.d(tag, "------ 4.2 BaseIMServer queryRoster() conn=" + getConn() + " isConnected=" + getConn().isConnected());
+		Log.d(tag, "------ 4.4 BaseIMServer.queryRoster() conn=" + getConn() + " isConnected=" + getConn().isConnected());
 		Roster roster = Roster.getInstanceFor(getConn());
-		Log.d(tag, "------ 4.3 BaseIMServer queryRoster() roster=" + roster);
+		Log.d(tag, "------ 4.5 BaseIMServer.queryRoster() roster=" + roster);
 		Collection<RosterEntry> entries = roster.getEntries();
-		Log.d(tag, "------ 4.4 BaseIMServer queryRoster() entries=" + entries);
+		Log.d(tag, "------ 4.6 BaseIMServer.queryRoster() entries=" + entries);
 		for (RosterEntry entry : entries) {
 			String jid = entry.getUser();
 			String name = entry.getName() != null ? entry.getName() : getJidPart(jid, "100");
@@ -165,16 +207,32 @@ public class BaseIMServer implements IIMServer {
 			ChatItem chatItem = new ChatItem("ID-" + name, "icon", name, "用户的 JID 是: " + jid);
 			chatItems.add(chatItem);
 		}
-		Log.d(tag, "------ 4.5 BaseIMServer queryRoster() chatItems=" + chatItems);
+		Log.d(tag, "------ 4.7 BaseIMServer.queryRoster() chatItems=" + chatItems);
 		return chatItems;
+	}
+	
+	/**
+	 * 设置 SharedPreferences
+	 * @param sharedPreferences
+	 */
+	public void setSharedPreferences(SharedPreferences sharedPreferences) {
+		this.sharedPreferences = sharedPreferences;
 	}
 	
 	/**
 	 * 获取链接
 	 * @return
 	 */
-	public synchronized static XMPPConnection getConn() {
+	public XMPPConnection getConn() {
 		return conn;
+	}
+	
+	public synchronized boolean isConnected() {
+		return isConnected;
+	}
+
+	public synchronized void setConnected(boolean isConnected) {
+		this.isConnected = isConnected;
 	}
 	
 }

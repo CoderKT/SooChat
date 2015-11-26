@@ -4,10 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import android.app.AlertDialog;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
@@ -32,13 +30,12 @@ import com.kekexun.soochat.activity.R;
 import com.kekexun.soochat.activity.main.addrbook.AddrBookFragment;
 import com.kekexun.soochat.activity.main.chat.ChatFragment;
 import com.kekexun.soochat.activity.main.discover.DiscoveryFragment;
-import com.kekexun.soochat.activity.main.myself.MySelfFragment;
+import com.kekexun.soochat.activity.main.myself.MyselfFragment;
 import com.kekexun.soochat.activity.main.myself.MyselfSettingActivity;
 import com.kekexun.soochat.business.sign.impl.SignBusiness;
 import com.kekexun.soochat.pojo.ChatItem;
 import com.kekexun.soochat.pojo.MyInfoItem;
 import com.kekexun.soochat.smack.BaseIMServer;
-import com.kekexun.soochat.smack.IIMServer;
 
 /**
  * 
@@ -65,7 +62,7 @@ public class MainActivity extends FragmentActivity {
 	private ChatFragment chatFragment;
 	private AddrBookFragment addrBookFragment;
 	private DiscoveryFragment discoveryFragment;
-	private MySelfFragment myselfFragment;
+	private MyselfFragment myselfFragment;
 	
 	private FragmentManager fragmentManager;
 	
@@ -119,12 +116,14 @@ public class MainActivity extends FragmentActivity {
 		btnDiscovery = (Button) this.findViewById(R.id.btnDiscovery);
 		btnMyself = (Button) this.findViewById(R.id.btnMyself);
 		
-		// Init chat panel
+		// Initialize chat panel
 		chatFragment = initChatPanel();
-		// Init addrBook panel
+		// Initialize addrBook panel
 		addrBookFragment = initAddrBookPanel();
-		discoveryFragment = new DiscoveryFragment();
-		myselfFragment = new MySelfFragment();
+		// Initialize discovery panel
+		discoveryFragment = initDiscoveryPanel();
+		// Initialize myself panel
+		myselfFragment = initMyselfPanel();
 		
 		fragments.add(chatFragment);
 		fragments.add(addrBookFragment);
@@ -173,30 +172,47 @@ public class MainActivity extends FragmentActivity {
 	}
 	
 	/**
-	 * Initialization chat panel
+	 * Initialize chat panel
 	 */
 	private ChatFragment initChatPanel() {
-		SharedPreferences sharedPreferences = this.getSharedPreferences("prefenrences", Context.MODE_PRIVATE);
-		//List<ChatItem> chatItems = (ArrayList<ChatItem>) getIntent().getSerializableExtra("chatItems");
-		final IIMServer imServer = new BaseIMServer(sharedPreferences);
+		BaseIMServer imServer = BaseIMServer.getInstance();
 		List<ChatItem> chatItems = imServer.queryRoster();
-		chatItems = chatItems != null ? chatItems : new ArrayList<ChatItem>();
 		Log.d(tag, "------ MainActivity.initChatPanel() chatItems=" + chatItems);
-		chatFragment = new ChatFragment(chatItems);
+		
+		chatFragment = new ChatFragment(this, chatItems);
 		return chatFragment;
 	}
 	
 	/**
-	 * Initialization chat panel
+	 * Initialize address book panel
 	 */
-	@SuppressWarnings("unchecked")
 	private AddrBookFragment initAddrBookPanel() {
-		List groupItems = (ArrayList<ChatItem>) getIntent().getSerializableExtra("groupItems");
-		groupItems = groupItems != null ? groupItems : new ArrayList();
-		addrBookFragment = new AddrBookFragment(groupItems);
+		addrBookFragment = new AddrBookFragment();
 		return addrBookFragment;
 	}
 	
+	/**
+	 * Initialize discovery panel
+	 * @return
+	 */
+	private DiscoveryFragment initDiscoveryPanel() {
+		discoveryFragment = new DiscoveryFragment();
+		return discoveryFragment;
+	}
+	
+	/**
+	 * Initialize myself panel
+	 * @return
+	 */
+	private MyselfFragment initMyselfPanel() {
+		myselfFragment = new MyselfFragment();
+		return myselfFragment;
+	}
+	
+	/**
+	 * …Ë÷√—°‘Òµƒ tab “≥
+	 * @param v
+	 */
 	public void setPage(View v) {
 		switch(v.getId()) {
 			case R.id.btnChat: 

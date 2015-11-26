@@ -4,7 +4,7 @@ import java.util.List;
 
 import com.kekexun.soochat.pojo.ChatItem;
 
-public interface IIMServer {
+public interface IMServer {
 	
 	public String getJidPart(String jid, String type);
 

@@ -17,7 +17,7 @@
         android:allowBackup="true"
         android:icon="@drawable/ic_launcher"
         android:label="@string/app_name"
-        android:theme="@style/AppTheme" >
+        android:theme="@style/AppTheme">
         <activity
             android:name="com.kekexun.soochat.activity.boot.BootActivity"
             android:theme="@android:style/Theme.NoTitleBar.Fullscreen">
@@ -28,15 +28,24 @@
             </intent-filter>
         </activity>
         
+        <!-- 欢迎 Activity -->
 		<activity android:name="com.kekexun.soochat.activity.boot.WelcomeActivity"/>
-        
+        <!-- 登录 Activity -->
         <activity android:name="com.kekexun.soochat.activity.sign.SignActivity"/>
         
+        <!-- 主页 Activity -->
         <activity
             android:launchMode="singleTop"
             android:name="com.kekexun.soochat.activity.main.MainActivity"
             android:screenOrientation="portrait"/>
         
+        <!-- 聊天 Activity -->
+        <activity
+            android:theme="@android:style/Theme.NoTitleBar"
+            android:launchMode="singleTop"
+            android:name="com.kekexun.soochat.activity.main.chat.ChatWinActivity"/>
+        
+        <!-- 我的 Activity -->
         <activity 
             android:launchMode="singleTop"
             android:name="com.sitech.kfapp.activity.main.myself.MyselfSettingActivity"/>

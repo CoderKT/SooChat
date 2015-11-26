@@ -58,7 +58,7 @@ public class SignActivity extends BaseActivity {
 	 * 登录
 	 * @param view
 	 */
-	public void loginAction(View view) {
+	public void signInAction(View view) {
 		String loginName = etLoginName.getText().toString().trim();
 		if (TextUtils.isEmpty(loginName)) {
 			Toast.makeText(this, "登录账号不能为空！", Toast.LENGTH_SHORT).show();
@@ -72,10 +72,10 @@ public class SignActivity extends BaseActivity {
 		}
 		
 		try {
-			signBusiness.doLogin(loginName, loginPassword);
+			signBusiness.doSignIn(loginName, loginPassword);
 		} catch (Exception e) {
 			Log.e(tag, "登录发生异常！" + e.getMessage());
-			Toast.makeText(this, "登录异常！原因：", Toast.LENGTH_SHORT).show();
+			Toast.makeText(this, "登录异常！原因：" + e.getMessage(), Toast.LENGTH_LONG).show();
 		}
 	}
 

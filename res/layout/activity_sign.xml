@@ -43,6 +43,6 @@
         android:layout_height="wrap_content"
         android:layout_below="@+id/et_login_password"
         android:text="@string/login"
-        android:onClick="loginAction" />
+        android:onClick="signInAction" />
 
 </RelativeLayout>
