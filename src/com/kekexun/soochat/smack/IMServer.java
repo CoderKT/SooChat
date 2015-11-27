@@ -8,8 +8,8 @@ public interface IMServer {
 	
 	public String getJidPart(String jid, String type);
 
-	public void connect(String username, String password, ConnectionListener connListener) throws Exception;
+	public boolean connect(String username, String password) throws Exception;
 	
-	public List<ChatItem> queryRoster();
+	public List<ChatItem> queryRoster() throws Exception;
 	
 }

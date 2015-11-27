@@ -33,11 +33,13 @@ public final class R {
         public static final int main_chat_chatwin_face=0x7f020008;
         public static final int main_discovery=0x7f020009;
         public static final int main_myself=0x7f02000a;
-        public static final int waze=0x7f02000b;
+        public static final int sign_password=0x7f02000b;
+        public static final int sign_username=0x7f02000c;
+        public static final int waze=0x7f02000d;
     }
     public static final class id {
         public static final int bottomBar=0x7f080005;
-        public static final int bt_login=0x7f08001a;
+        public static final int bt_login=0x7f08001c;
         public static final int btnAddrBook=0x7f080007;
         public static final int btnChat=0x7f080006;
         public static final int btnDiscovery=0x7f080008;
@@ -46,15 +48,17 @@ public final class R {
         public static final int btnUpdate=0x7f080002;
         public static final int etNewName=0x7f080016;
         public static final int etPath=0x7f080000;
-        public static final int et_login_name=0x7f080018;
-        public static final int et_login_password=0x7f080019;
+        public static final int et_login_name=0x7f080019;
+        public static final int et_login_password=0x7f08001b;
         public static final int ivChatItemIcon=0x7f08000c;
         public static final int ivFavicon=0x7f08000f;
         public static final int ivIcon=0x7f080014;
+        public static final int ivLoginName=0x7f080018;
+        public static final int ivLoginPassword=0x7f08001a;
         public static final int iv_header=0x7f080017;
         public static final int lvChatList=0x7f08000a;
         public static final int lvMyInfo=0x7f080012;
-        public static final int system_setting=0x7f08001b;
+        public static final int system_setting=0x7f08001d;
         public static final int tvChatItemDesc=0x7f08000e;
         public static final int tvChatItemTitle=0x7f08000d;
         public static final int tvMessage=0x7f080003;

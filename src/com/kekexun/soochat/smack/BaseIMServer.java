@@ -11,8 +11,14 @@ import org.jivesoftware.smack.ConnectionConfiguration.SecurityMode;
 import org.jivesoftware.smack.SASLAuthentication;
 import org.jivesoftware.smack.SmackException;
 import org.jivesoftware.smack.XMPPConnection;
+import org.jivesoftware.smack.chat.Chat;
+import org.jivesoftware.smack.chat.ChatManager;
+import org.jivesoftware.smack.chat.ChatManagerListener;
+import org.jivesoftware.smack.packet.Presence;
+import org.jivesoftware.smack.packet.Presence.Type;
 import org.jivesoftware.smack.roster.Roster;
 import org.jivesoftware.smack.roster.RosterEntry;
+import org.jivesoftware.smack.roster.RosterListener;
 import org.jivesoftware.smack.sasl.SASLMechanism;
 import org.jivesoftware.smack.tcp.XMPPTCPConnection;
 import org.jivesoftware.smack.tcp.XMPPTCPConnectionConfiguration;
@@ -44,6 +50,16 @@ public class BaseIMServer implements IMServer {
 	private AbstractXMPPConnection conn;
 	
 	/**
+	 * 花名册
+	 */
+	private Roster roster;
+	
+	/**
+	 * 会话管理
+	 */
+	private ChatManager chatManager;
+	
+	/**
 	 * 
 	 */
 	private SharedPreferences sharedPreferences;
@@ -52,12 +68,84 @@ public class BaseIMServer implements IMServer {
 	 * 是否连接到IMServer
 	 */
 	private boolean isConnected = false;
+	
+	/**
+	 * 花名册列表
+	 */
+	private List<ChatItem> rosterList = new ArrayList<ChatItem>();
 
 	/**
 	 * Construct
 	 * @param sharedPreferences
 	 */
 	private BaseIMServer() {
+	}
+	
+	/**
+	 * 花名册监听对象
+	 */
+	private RosterListener rosterListener = new RosterListener() {
+		
+		@Override
+		public void presenceChanged(Presence presence) {
+			Log.d(tag, "------ BaseIMServer.rosterListener.presenceChanged()");
+			Type type = presence.getType();
+		}
+		
+		@Override
+		public void entriesUpdated(Collection<String> addresses) {
+			Log.d(tag, "------ BaseIMServer.rosterListener.entriesUpdated()");
+		}
+		
+		@Override
+		public void entriesDeleted(Collection<String> addresses) {
+			Log.d(tag, "------ BaseIMServer.rosterListener.entriesDeleted()");
+		}
+		
+		@Override
+		public void entriesAdded(Collection<String> addresses) {
+			Log.d(tag, "------ BaseIMServer.rosterListener.entriesAdded()");
+		}
+		
+	};
+	
+	/**
+	 * 会话监听器
+	 */
+	private ChatManagerListener chatManagerListener = new ChatManagerListener() {
+
+		@Override
+		public void chatCreated(Chat chat, boolean createdLocally) {
+			if (!createdLocally) {
+				//TODO chat.addMessageListener(new MyNewMessageListener());
+			}
+
+		}
+		
+	};
+	
+	/**
+	 * 
+	 */
+	private void initRoster() {
+		if (getConn() == null || !getConn().isConnected()) {
+			Log.d(tag, "------ BaseIMServer.queryRoster() 连接异常：conn=" + getConn());
+			return;
+		}
+		Log.d(tag, "------ BaseIMServer.initRoster() 准备初始化花名册：roster=" + roster);
+		Collection<RosterEntry> entries = roster.getEntries();
+		Log.d(tag, "------ BaseIMServer.initRoster() 准备初始化花名册：entries=" + entries);
+		for (RosterEntry entry : entries) {
+			String jid = entry.getUser();
+			String name = entry.getName() != null ? entry.getName() : getJidPart(jid, "100");
+			//ItemStatus itemStatus = entry.getStatus();
+			//ItemType itemType = entry.getType();
+			//List<RosterGroup> groups = entry.getGroups();
+			
+			ChatItem chatItem = new ChatItem("ID-" + name, "icon", name, "用户的 JID 是: " + jid);
+			rosterList.add(chatItem);
+		}
+		Log.d(tag, "------ BaseIMServer.initRoster() 完成花名册初始化：rosterList=" + rosterList);
 	}
 	
 	/**
@@ -96,83 +184,87 @@ public class BaseIMServer implements IMServer {
 	 * 连接的 IMServer 服务器
 	 */
 	@Override
-	public void connect(final String username, final String password, final ConnectionListener connListener) throws Exception {
-		Log.d(tag, "------ 1 BaseIMServer.connect()");
-		
+	public boolean connect(String username, String password) throws Exception {
 		if (getConn() != null) {
-			return;
+			Log.d(tag, "------ BaseIMServer.connect() conn=null, return false");
+			return false;
 		}
 		
-		new Thread() {
-
+		// XMPP service (i.e., the XMPP domain)
+		String serviceName = sharedPreferences.getString(K.PreferenceKey.KEY_XMPP_RESOURCE, "192.168.9.105");
+		// 资源
+		String resource = sharedPreferences.getString(K.PreferenceKey.KEY_XMPP_RESOURCE, "SooChat");
+		// 端口
+		int port = sharedPreferences.getInt(K.PreferenceKey.KEY_XMPP_SERVER_PORT, 5222);
+		
+		XMPPTCPConnectionConfiguration.Builder configBuilder = XMPPTCPConnectionConfiguration.builder();
+		configBuilder.setUsernameAndPassword(username, password)
+					 .setServiceName(serviceName)
+					 .setPort(port)
+					 .setResource(resource)
+					 .setSecurityMode(SecurityMode.disabled);
+		
+		SASLAuthentication.registerSASLMechanism(new SASLMechanism() {
+			
 			@Override
-			public void run() {
-				Log.d(tag, "------ 2 BaseIMServer#new Thread().run() begin");
-				
-				// XMPP service (i.e., the XMPP domain)
-				String serviceName = sharedPreferences.getString(K.PreferenceKey.KEY_XMPP_RESOURCE, "192.168.9.120");
-				// 资源
-				String resource = sharedPreferences.getString(K.PreferenceKey.KEY_XMPP_RESOURCE, "SooChat");
-				// 端口
-				int port = sharedPreferences.getInt(K.PreferenceKey.KEY_XMPP_SERVER_PORT, 5222);
-				
-				XMPPTCPConnectionConfiguration.Builder configBuilder = XMPPTCPConnectionConfiguration.builder();
-				configBuilder.setUsernameAndPassword(username, password)
-							 .setServiceName(serviceName)
-							 .setPort(port)
-							 .setResource(resource)
-							 .setSecurityMode(SecurityMode.disabled);
-				
-				SASLAuthentication.registerSASLMechanism(new SASLMechanism() {
-					
-					@Override
-					protected SASLMechanism newInstance() {
-						return this;
-					}
-					
-					@Override
-					public int getPriority() {
-						return 0;
-					}
-					
-					@Override
-					public String getName() {
-						return null;
-					}
-					
-					@Override
-					protected byte[] getAuthenticationText() throws SmackException {
-						return null;
-					}
-					
-					@Override
-					public void checkIfSuccessfulOrThrow() throws SmackException {
-						
-					}
-					
-					@Override
-					protected void authenticateInternal(CallbackHandler cbh) throws SmackException {
-						
-					}
-				});
-				
-				try {
-					conn = new XMPPTCPConnection(configBuilder.build());
-					setConnected(true);
-					conn.connect();
-					conn.login();
-					Log.d(tag, "------ 2.1 BaseIMServer#new Thread().run() conn=" + conn);
-					connListener.onSuccess();
-				} catch (Exception e) {
-					setConnected(false);
-					Log.e(tag, "@@@@@@ BaseIMServer#new Thread().run() " + e.getMessage());
-					connListener.onFailure(e.getMessage());
-				}
-				
-				Log.d(tag, "------ 2.2 BaseIMServer#new Thread().run() end");
+			protected SASLMechanism newInstance() {
+				return this;
 			}
 			
-		}.start();
+			@Override
+			public int getPriority() {
+				return 0;
+			}
+			
+			@Override
+			public String getName() {
+				return null;
+			}
+			
+			@Override
+			protected byte[] getAuthenticationText() throws SmackException {
+				return null;
+			}
+			
+			@Override
+			public void checkIfSuccessfulOrThrow() throws SmackException {
+				
+			}
+			
+			@Override
+			protected void authenticateInternal(CallbackHandler cbh) throws SmackException {
+				
+			}
+		});
+		
+		try {
+			conn = new XMPPTCPConnection(configBuilder.build());
+			// 连接
+			conn.connect();
+			
+			// TODO 发送获取花名册节
+			
+			// 添加花名册监听器
+			roster = Roster.getInstanceFor(getConn());
+			roster.addRosterListener(rosterListener);
+			
+			// 添加消息监听器
+			chatManager = ChatManager.getInstanceFor(getConn());
+			chatManager.addChatListener(chatManagerListener);
+			
+			// 登录
+			conn.login();
+			
+			if (conn != null && conn.isConnected()) { // TODO 异常情况未考虑完整
+				return true;
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+			Log.e(tag, "@@@@@@ 登录到 IMServer 出错，详细原因：" + e.getMessage());
+			return false;
+		}
+		
+		return false;
 	}
 	
 	/**
@@ -182,33 +274,7 @@ public class BaseIMServer implements IMServer {
 	 */
 	@Override
 	public List<ChatItem> queryRoster() {
-		Log.d(tag, "------ 4 BaseIMServer.queryMyRoster()");
-		List<ChatItem> chatItems = new ArrayList<ChatItem>();
-		if (getConn() == null || !getConn().isConnected()) { // TODO conn is null or not connected need to handle.
-			Log.d(tag, "------ 4.1 BaseIMServer.queryRoster() conn=" + getConn());
-			if (getConn() != null) {
-				Log.d(tag, "------ 4.2 BaseIMServer.queryRoster() isConnected=" + getConn().isConnected());	
-			}
-			Log.d(tag, "------ 4.3 BaseIMServer.queryRoster() return");
-			return chatItems;
-		}
-		Log.d(tag, "------ 4.4 BaseIMServer.queryRoster() conn=" + getConn() + " isConnected=" + getConn().isConnected());
-		Roster roster = Roster.getInstanceFor(getConn());
-		Log.d(tag, "------ 4.5 BaseIMServer.queryRoster() roster=" + roster);
-		Collection<RosterEntry> entries = roster.getEntries();
-		Log.d(tag, "------ 4.6 BaseIMServer.queryRoster() entries=" + entries);
-		for (RosterEntry entry : entries) {
-			String jid = entry.getUser();
-			String name = entry.getName() != null ? entry.getName() : getJidPart(jid, "100");
-			//ItemStatus itemStatus = entry.getStatus();
-			//ItemType itemType = entry.getType();
-			//List<RosterGroup> groups = entry.getGroups();
-			
-			ChatItem chatItem = new ChatItem("ID-" + name, "icon", name, "用户的 JID 是: " + jid);
-			chatItems.add(chatItem);
-		}
-		Log.d(tag, "------ 4.7 BaseIMServer.queryRoster() chatItems=" + chatItems);
-		return chatItems;
+		return rosterList;
 	}
 	
 	/**

@@ -1,18 +1,17 @@
 package com.kekexun.soochat.business.sign.impl;
 
 import android.content.Context;
-import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
+import android.os.Handler;
+import android.os.Message;
 import android.util.Log;
 
-import com.kekexun.soochat.activity.main.MainActivity;
 import com.kekexun.soochat.activity.sign.SignActivity;
 import com.kekexun.soochat.business.impl.BaseBusiness;
 import com.kekexun.soochat.common.BusinessNameEnum;
 import com.kekexun.soochat.common.K;
 import com.kekexun.soochat.smack.BaseIMServer;
-import com.kekexun.soochat.smack.ConnectionListener;
 
 /**
  * 
@@ -63,48 +62,36 @@ public class SignBusiness extends BaseBusiness {
 	 * @return
 	 * @throws Exception
 	 */
-	public void doSignIn(final String username, final String password) throws Exception {
+	public void doSignIn(final String username, final String password, final Handler handler) throws Exception {
 		Log.d(tag, "------ 0 SignBusiness.doSignIn()");
 		
-		if (imServer.getConn() == null || !imServer.getConn().isConnected()) {
-			Log.d(tag, "------ 0.0 SignBusiness.doSignIn() conn is null or not connected!");
-			Log.d(tag, "------ 0.1 SignBusiness.doSignIn() conn = " + imServer.getConn());
-			if (imServer.getConn() != null) {
-				Log.d(tag, "------ 0.2 SignBusiness.doSignIn() isConnected = " + imServer.getConn());
-			} else {
-				Log.d(tag, "------ 0.2 SignBusiness.doSignIn() isConnected = null" );
-			}
+		// 启动线程进行网络登录
+		new Thread() {
+
+			@Override
+			public void run() {
+				// 登录
+				try {
+					boolean isConnected = imServer.connect(username, password);
+					Message msg = new Message();
+					if (isConnected) {
+						msg.what = SignActivity.CONNECT_TO_IMSERVER_SUCCESS;
+					} else {
+						msg.what = SignActivity.CONNECT_TO_IMSERVER_FAILURE;
+						msg.obj = "登录 IMServer 失败！";
+					}
+					handler.sendMessage(msg);
+				} catch (Exception e) {
+					e.printStackTrace();
+					Log.e(tag, "@@@@@@ SignBusiness.doSignIn#new-Thread().run(), 登录IMServer出错！详细原因：" + e.getMessage());
+					Message msg = new Message();
+					msg.what = SignActivity.CONNECT_TO_IMSERVER_FAILURE;
+					msg.obj = "登录 IMServer 失败！详细原因：" + e.getMessage();
+					handler.sendMessage(msg);
+				}
+			}			
 			
-			// 登录
-			imServer.connect(username, password, new ConnectionListener() {
-				
-				@Override
-				public void onSuccess() {
-					Log.d(tag, "------ 3 ConnectionListener.onSuccess(). 链接 IMServer 成功！");
-				}
-				
-				@Override
-				public void onFailure(String errorMessage) {
-					Log.e(tag, "@@@@@@ 3 ConnectionListener.onFailure(). 连接IMServer 失败！详细原因：" + errorMessage);
-				}
-				
-			});
-		}
-		
-		while (!imServer.isConnected()) {
-			Log.d(tag, "------ 0.3 Waiting for the sign thread to connect IM Server.");
-		}
-		
-		Log.d(tag, "------ 0.4 SignBusiness.doSignIn() conn = " + imServer.getConn()); 
-		Log.d(tag, "------ 0.5 SignBusiness.doSignIn() isConnected = " + imServer.getConn().isConnected());
-		
-		// 报错登录信息
-		saveLoginInfo(username, password, true);
-		// 跳转到主页面
-		Intent intent = new Intent(context, MainActivity.class);
-		context.startActivity(intent);
-		
-		((SignActivity) context).finish();
+		}.start();
 	}
 	
 	/**
@@ -120,6 +107,4 @@ public class SignBusiness extends BaseBusiness {
 		editor.putString(K.Login.LOGIN_PASSWORD, loginPassword);
 		editor.putBoolean(K.Login.IS_LOGIN, isLogin);
 		return editor.commit();
-	}
-	
-}
+	}}

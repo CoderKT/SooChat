@@ -18,16 +18,36 @@
         android:layout_centerHorizontal="true"
         android:layout_marginTop="50dp"
         android:src="@drawable/login_header" 
+        android:layout_marginBottom="60dp"
         android:contentDescription="@string/login_header_image"/>
 
+    <ImageView 
+        android:id="@+id/ivLoginName"
+        android:layout_width="45dp"
+        android:layout_height="45dp"
+        android:layout_below="@id/iv_header"
+        android:layout_alignParentLeft="true"
+        android:src="@drawable/sign_username"
+        android:contentDescription="@string/blank_description"/>
+    
     <EditText
         android:id="@+id/et_login_name"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_below="@id/iv_header"
-        android:inputType=""
+        android:layout_alignParentLeft="true"
+        android:paddingLeft="50dp"   
         android:hint="@string/username_phone_email">
     </EditText>
+    
+    <ImageView 
+        android:id="@+id/ivLoginPassword"
+        android:layout_width="45dp"
+        android:layout_height="45dp"
+        android:layout_below="@id/ivLoginName"
+        android:layout_alignParentLeft="true"
+        android:src="@drawable/sign_password"
+        android:contentDescription="@string/blank_description"/>    
 
     <EditText
         android:id="@+id/et_login_password"
@@ -35,6 +55,7 @@
         android:layout_height="wrap_content"
         android:layout_below="@id/et_login_name"
         android:inputType="textPassword"
+        android:paddingLeft="50dp"
         android:hint="@string/please_input_password"/>
 
     <Button
@@ -43,6 +64,9 @@
         android:layout_height="wrap_content"
         android:layout_below="@+id/et_login_password"
         android:text="@string/login"
+        android:layout_marginLeft="10dp"
+        android:layout_marginRight="10dp"
+        android:layout_marginTop="30dp"
         android:onClick="signInAction" />
 
 </RelativeLayout>
