@@ -69,4 +69,15 @@
         android:layout_marginTop="30dp"
         android:onClick="signInAction" />
 
+    <Button
+        android:id="@+id/btnRegister"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:text="@string/register"
+        android:layout_marginLeft="10dp"
+        android:layout_marginBottom="5dp"
+        android:onClick="openRegister"
+        android:background="#FFF"/>
+
 </RelativeLayout>

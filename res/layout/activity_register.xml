@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent" >
+
+    <TextView 
+        android:id="@+id/tvNickname"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="昵称"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentLeft="true"
+        android:layout_marginTop="30dip"
+        android:layout_marginLeft="10dip"/>
+    
+    <EditText 
+        android:id="@+id/etNickname"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="起一个好听的昵称"
+        android:layout_marginTop="10dip"
+        android:paddingLeft="45dip"/>
+    
+	<TextView 
+        android:id="@+id/tvPhoneRegion"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="+86"
+        android:layout_below="@id/tvNickname"
+        android:layout_alignParentLeft="true"
+        android:layout_marginTop="30dip"
+        android:layout_marginLeft="10dip"/>
+	
+    <EditText 
+        android:id="@+id/etPhoneNum"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/etNickname"
+        android:paddingLeft="45dip"
+        android:inputType="phone"/>
+
+   	<TextView 
+        android:id="@+id/tvPassword"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="密码"
+        android:layout_below="@id/tvPhoneRegion"
+        android:layout_alignParentLeft="true"
+        android:layout_marginTop="30dip"
+        android:layout_marginLeft="10dip"/>
+   	
+    <EditText 
+        android:id="@+id/etPassword"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/etPhoneNum"
+        android:paddingLeft="45dip"
+        android:inputType="textPassword"/>
+    
+    <Button 
+        android:id="@+id/btnRegister"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/tvPassword"
+        android:text="注册"
+        android:layout_marginTop="30dip"
+        android:onClick="registerAction"/>
+   	
+</RelativeLayout>

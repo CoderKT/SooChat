@@ -20,6 +20,7 @@ import android.widget.Toast;
 import com.kekexun.soochat.activity.BaseActivity;
 import com.kekexun.soochat.activity.R;
 import com.kekexun.soochat.activity.main.MainActivity;
+import com.kekexun.soochat.activity.register.RegisterActivity;
 import com.kekexun.soochat.business.sign.impl.SignBusiness;
 
 /**
@@ -188,6 +189,15 @@ public class SignActivity extends BaseActivity {
 			Log.e(tag, "登录发生异常！" + e.getMessage());
 			Toast.makeText(this, "登录异常！原因：" + e.getMessage(), Toast.LENGTH_LONG).show();
 		}
+	}
+	
+	/**
+	 * 打开登录窗口
+	 * @param view
+	 */
+	public void openRegister(View view) {
+		Intent intent = new Intent(this, RegisterActivity.class);
+		startActivity(intent);
 	}
 
 }

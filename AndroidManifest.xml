@@ -32,6 +32,8 @@
 		<activity android:name="com.kekexun.soochat.activity.boot.WelcomeActivity"/>
         <!-- 登录 Activity -->
         <activity android:name="com.kekexun.soochat.activity.sign.SignActivity"/>
+        <!-- 注册Activity -->
+        <activity android:launchMode="singleTop" android:name="com.kekexun.soochat.activity.register.RegisterActivity"/>
         
         <!-- 主页 Activity -->
         <activity
