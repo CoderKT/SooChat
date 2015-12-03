@@ -10,16 +10,22 @@ import javax.security.auth.callback.CallbackHandler;
 
 import org.jivesoftware.smack.AbstractXMPPConnection;
 import org.jivesoftware.smack.ConnectionConfiguration.SecurityMode;
+import org.jivesoftware.smack.ConnectionListener;
+import org.jivesoftware.smack.ReconnectionManager;
 import org.jivesoftware.smack.SASLAuthentication;
 import org.jivesoftware.smack.SmackException;
+import org.jivesoftware.smack.SmackException.NotConnectedException;
+import org.jivesoftware.smack.StanzaListener;
 import org.jivesoftware.smack.XMPPConnection;
 import org.jivesoftware.smack.chat.Chat;
 import org.jivesoftware.smack.chat.ChatManager;
 import org.jivesoftware.smack.chat.ChatManagerListener;
+import org.jivesoftware.smack.filter.StanzaFilter;
+import org.jivesoftware.smack.filter.StanzaTypeFilter;
 import org.jivesoftware.smack.packet.IQ;
 import org.jivesoftware.smack.packet.Presence;
 import org.jivesoftware.smack.packet.Presence.Type;
-import org.jivesoftware.smack.provider.ProviderManager;
+import org.jivesoftware.smack.packet.Stanza;
 import org.jivesoftware.smack.roster.Roster;
 import org.jivesoftware.smack.roster.RosterEntry;
 import org.jivesoftware.smack.roster.RosterListener;
@@ -27,7 +33,7 @@ import org.jivesoftware.smack.sasl.SASLMechanism;
 import org.jivesoftware.smack.tcp.XMPPTCPConnection;
 import org.jivesoftware.smack.tcp.XMPPTCPConnectionConfiguration;
 import org.jivesoftware.smackx.iqregister.packet.Registration;
-import org.jivesoftware.smackx.xroster.provider.RosterExchangeProvider;
+import org.jivesoftware.smackx.ping.android.ServerPingWithAlarmManager;
 
 import android.content.SharedPreferences;
 import android.util.Log;
@@ -78,7 +84,7 @@ public class BaseIMServer implements IMServer {
 	/**
 	 * 花名册列表
 	 */
-	private List<ChatItem> rosterList = new ArrayList<ChatItem>();
+	private List<ChatItem> rosterList;
 
 	/**
 	 * Construct
@@ -91,6 +97,11 @@ public class BaseIMServer implements IMServer {
 	 * 花名册监听对象
 	 */
 	private RosterListener rosterListener = new RosterListener() {
+		
+		@Override
+		public void entriesAdded(Collection<String> addresses) {
+			Log.d(tag, "------ BaseIMServer.rosterListener.entriesAdded()");
+		}
 		
 		@Override
 		public void presenceChanged(Presence presence) {
@@ -107,11 +118,6 @@ public class BaseIMServer implements IMServer {
 		@Override
 		public void entriesDeleted(Collection<String> addresses) {
 			Log.d(tag, "------ BaseIMServer.rosterListener.entriesDeleted()");
-		}
-		
-		@Override
-		public void entriesAdded(Collection<String> addresses) {
-			Log.d(tag, "------ BaseIMServer.rosterListener.entriesAdded()");
 		}
 		
 	};
@@ -213,40 +219,18 @@ public class BaseIMServer implements IMServer {
 	    return "0";
 	}
 	
-	private boolean openConnection() throws Exception {
-		if (null == conn || !conn.isAuthenticated()) {  
-			//XMPPConnection.DEBUG_ENABLED = true;// 开启DEBUG模式  
-			// 配置连接  
-			/*ConnectionConfiguration config = new ConnectionConfiguration(SERVER_HOST, SERVER_PORT, SERVER_NAME);  
-			config.setReconnectionAllowed(true);  
-			config.setSecurityMode(ConnectionConfiguration.SecurityMode.disabled);  
-			config.setSendPresence(true); // 状态设为离线，目的为了取离线消息  
-			config.setSASLAuthenticationEnabled(false); // 是否启用安全验证  
-			config.setTruststorePath("/system/etc/security/cacerts.bks");  
-			config.setTruststorePassword("changeit");  
-			config.setTruststoreType("bks");  
-			connection = new XMPPConnection(config);  
-			connection.connect();// 连接到服务器  
-			// 配置各种Provider，如果不配置，则会无法解析数据  
-			configureConnection(ProviderManager.getInstance());  */
-			return true;  
-		}  
-
-        return false;  
-	}
-
 	/**
 	 * 连接的 IMServer 服务器
 	 */
 	@Override
 	public boolean connect(String username, String password) throws Exception {
-		if (getConn() != null) {
-			Log.d(tag, "------ BaseIMServer.connect() conn=null, return false");
-			return false;
+		if (getConn() != null && getConn().isConnected()) {
+			Log.d(tag, "------ BaseIMServer.connect() already connected. return true !");
+			return true;
 		}
 		
 		// XMPP service (i.e., the XMPP domain)
-		String serviceName = sharedPreferences.getString(K.PreferenceKey.KEY_XMPP_RESOURCE, "192.168.43.228");
+		String serviceName = sharedPreferences.getString(K.PreferenceKey.KEY_XMPP_RESOURCE, "192.168.9.115");
 		// 资源
 		String resource = sharedPreferences.getString(K.PreferenceKey.KEY_XMPP_RESOURCE, "SooChat");
 		// 端口
@@ -297,18 +281,15 @@ public class BaseIMServer implements IMServer {
 			conn = new XMPPTCPConnection(configBuilder.build());
 			// 连接
 			conn.connect();
+			// 设置回执包超时时长
+			conn.setPacketReplyTimeout(10000);
+			// 设置自动重连
+			ReconnectionManager.getInstanceFor(conn).enableAutomaticReconnection();
+			// TODO 不清楚
+			ServerPingWithAlarmManager.getInstanceFor(conn).setEnabled(true);
 			
-			// TODO 发送获取花名册节
-			/*CustomIQ myIQ = new CustomIQ("query", "jabber:iq:roster");
-			myIQ.setType(IQ.Type.get); //or use instead SET
-			String jid = "user2";
-			myIQ.setTo(jid);
-
-			CustomIQProvider provider = new CustomIQProvider(myIQ); //This will create a customIQ again. Possib
-			ProviderManager.addIQProvider("query", "myxmlns", provider);
-			conn.sendStanza(myIQ);
-			
-			ProviderManager.addExtensionProvider("presence", "jabber:iq:roster", new RosterExchangeProvider());*/
+			// 添加链接监听器
+			conn.addConnectionListener(new MyConnectionListener());
 			
 			// 添加花名册监听器
 			roster = Roster.getInstanceFor(getConn());
@@ -318,8 +299,23 @@ public class BaseIMServer implements IMServer {
 			chatManager = ChatManager.getInstanceFor(getConn());
 			chatManager.addChatListener(chatManagerListener);
 			
+			// 添加IQ监听器
+			StanzaFilter stanzaFilter = new StanzaTypeFilter(IQ.class);
+			StanzaListener myListener = new StanzaListener() {
+				@Override
+				public void processPacket(Stanza stanza) throws NotConnectedException {
+					String from = stanza.getFrom();
+					String to = stanza.getTo();
+					System.out.println("------ from=" + from + " to=" + to + " stanza=" + stanza);
+					// 初始化花名册
+					initRoster();
+				}  
+				 
+			};
+			conn.addAsyncStanzaListener(myListener, stanzaFilter);
+			
 			// 登录
-			conn.login();
+			conn.login();			
 			
 			if (conn != null && conn.isConnected()) { // TODO 异常情况未考虑完整
 				return true;
@@ -399,7 +395,7 @@ public class BaseIMServer implements IMServer {
 	 * @return
 	 */
 	@Override
-	public List<ChatItem> queryRoster() {
+	public List<ChatItem> queryRoster() throws Exception {
 		return rosterList;
 	}
 	
@@ -428,7 +424,7 @@ public class BaseIMServer implements IMServer {
 	}
 	
 	/**
-	 * 
+	 * Initialize roster
 	 */
 	private void initRoster() {
 		if (getConn() == null || !getConn().isConnected()) {
@@ -436,6 +432,8 @@ public class BaseIMServer implements IMServer {
 			return;
 		}
 		Log.d(tag, "------ BaseIMServer.initRoster() 准备初始化花名册：roster=" + roster);
+		
+		rosterList = new ArrayList<ChatItem>();
 		Collection<RosterEntry> entries = roster.getEntries();
 		Log.d(tag, "------ BaseIMServer.initRoster() 准备初始化花名册：entries=" + entries);
 		for (RosterEntry entry : entries) {
@@ -449,6 +447,50 @@ public class BaseIMServer implements IMServer {
 			rosterList.add(chatItem);
 		}
 		Log.d(tag, "------ BaseIMServer.initRoster() 完成花名册初始化：rosterList=" + rosterList);
+	}
+	
+	/**
+	 * 链接监听器
+	 */
+	private class MyConnectionListener implements ConnectionListener {
+
+		private static final String tag = "MyConnectionListener";
+		
+		@Override
+		public void connected(XMPPConnection connection) {
+			Log.d(tag, "------ MyConnectionListener.connected()");
+		}
+
+		@Override
+		public void authenticated(XMPPConnection connection, boolean resumed) {
+			Log.d(tag, "------ MyConnectionListener.authenticated()");
+		}
+
+		@Override
+		public void connectionClosed() {
+			Log.d(tag, "------ MyConnectionListener.connectionClosed()");
+		}
+
+		@Override
+		public void connectionClosedOnError(Exception e) {
+			Log.d(tag, "------ MyConnectionListener.connectionClosedOnError()");
+		}
+
+		@Override
+		public void reconnectionSuccessful() {
+			Log.d(tag, "------ MyConnectionListener.reconnectionSuccessful()");
+		}
+
+		@Override
+		public void reconnectingIn(int seconds) {
+			Log.d(tag, "------ MyConnectionListener.reconnectingIn()");
+		}
+
+		@Override
+		public void reconnectionFailed(Exception e) {
+			Log.d(tag, "------ MyConnectionListener.reconnectionFailed()");
+		}
+		
 	}
 	
 }

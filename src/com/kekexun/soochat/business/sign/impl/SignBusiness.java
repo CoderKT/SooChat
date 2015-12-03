@@ -47,15 +47,6 @@ public class SignBusiness extends BaseBusiness {
 	}
 	
 	/**
-	 * ÅÐ¶ÏÊÇ·ñÒÑ¾­µÇÂ¼
-	 * @param context
-	 * @return
-	 */
-	public boolean isLogin() {
-		return sharedPreferences.getBoolean(K.Login.IS_LOGIN, false);
-	}
-	
-	/**
 	 * Ö´ÐÐµÇÂ¼
 	 * @param username
 	 * @param password

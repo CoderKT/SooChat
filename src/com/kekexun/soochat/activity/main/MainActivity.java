@@ -4,8 +4,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 import android.app.AlertDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
@@ -32,6 +34,7 @@ import com.kekexun.soochat.activity.main.chat.ChatFragment;
 import com.kekexun.soochat.activity.main.discover.DiscoveryFragment;
 import com.kekexun.soochat.activity.main.myself.MyselfFragment;
 import com.kekexun.soochat.activity.main.myself.MyselfSettingActivity;
+import com.kekexun.soochat.activity.sign.SignActivity;
 import com.kekexun.soochat.business.sign.impl.SignBusiness;
 import com.kekexun.soochat.pojo.ChatItem;
 import com.kekexun.soochat.pojo.MyInfoItem;
@@ -66,13 +69,22 @@ public class MainActivity extends FragmentActivity {
 	
 	private FragmentManager fragmentManager;
 	
+	private SharedPreferences sharedPreferences;
+	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
 		
+		sharedPreferences = getSharedPreferences("prefenrences", Context.MODE_PRIVATE);
+		
 		// 初始化 Views
-		initViews();
+		try {
+			initViews();
+		} catch (Exception e) {
+			e.printStackTrace();
+			Log.e(tag, "出错了，详细原因：" + e.getMessage());
+		}
 	}
 	
 	@Override
@@ -108,7 +120,7 @@ public class MainActivity extends FragmentActivity {
 	/**
 	 * 初始化 Views
 	 */
-	private void initViews() {
+	private void initViews() throws Exception {
 		vpMain = (ViewPager) this.findViewById(R.id.vpMain);
 		
 		btnChat = (Button) this.findViewById(R.id.btnChat);
@@ -174,11 +186,15 @@ public class MainActivity extends FragmentActivity {
 	/**
 	 * Initialize chat panel
 	 */
-	private ChatFragment initChatPanel() {
+	private ChatFragment initChatPanel() throws Exception {
 		BaseIMServer imServer = BaseIMServer.getInstance();
+		imServer.setSharedPreferences(sharedPreferences);
 		List<ChatItem> chatItems = imServer.queryRoster();
-		Log.d(tag, "------ MainActivity.initChatPanel() chatItems=" + chatItems);
-		
+		if (chatItems == null) { // TODO
+			Intent intent = new Intent(this, SignActivity.class);
+			startActivity(intent);
+			this.finish();
+		}
 		chatFragment = new ChatFragment(this, chatItems);
 		return chatFragment;
 	}

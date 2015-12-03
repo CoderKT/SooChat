@@ -32,8 +32,8 @@ public class ChatWinActivity extends BaseActivity {
 	 * @param view
 	 */
 	public void goBack(View view) {
-		Intent intent = new Intent(this, MainActivity.class); //TOTO返回异常
-		this.startActivity(intent);
+		/*Intent intent = new Intent(this, MainActivity.class); //TODO返回异常
+		this.startActivity(intent);*/
 		this.finish();
 	}
 	

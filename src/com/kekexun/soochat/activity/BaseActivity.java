@@ -2,8 +2,10 @@ package com.kekexun.soochat.activity;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.os.Bundle;
 
 /**
  * 
@@ -21,6 +23,18 @@ public class BaseActivity extends Activity {
 	// ∫·∆¡
 	protected static final int WINDOW_HORIZONTAL = 0;
 	
+	// ≈‰÷√—°œÓ
+	protected SharedPreferences sharedPreferences;
+	
+	
+	
+	@Override
+	protected void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
+		
+		sharedPreferences = getSharedPreferences("prefenrences", Context.MODE_PRIVATE);
+	}
+
 	/**
 	 * ºÏ≤ÈÕ¯¬Á◊¥Ã¨
 	 */

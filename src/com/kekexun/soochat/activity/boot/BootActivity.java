@@ -1,18 +1,18 @@
 package com.kekexun.soochat.activity.boot;
 
-import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 
+import com.kekexun.soochat.activity.BaseActivity;
 import com.kekexun.soochat.activity.main.MainActivity;
-import com.kekexun.soochat.business.sign.impl.SignBusiness;
+import com.kekexun.soochat.common.K;
 
 /**
  * 
  * @author Ke.Wang
  *
  */
-public class BootActivity extends Activity {
+public class BootActivity extends BaseActivity {
 	
 	private boolean isLogin = false;
 
@@ -20,10 +20,8 @@ public class BootActivity extends Activity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		
-		SignBusiness signBusiness = new SignBusiness(BootActivity.this);
-		
 		// ÅÐ¶ÏÊÇ·ñÒÑ¾­µÇÂ¼
-		isLogin = signBusiness.isLogin();
+		isLogin = sharedPreferences.getBoolean(K.Login.IS_LOGIN, false);
 		
 		Intent intent = new Intent();
 		if (!isLogin) {
